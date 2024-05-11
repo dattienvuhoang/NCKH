@@ -18,6 +18,7 @@ df = None
 radio_selection = None
 n = 1
 
+
 def read_csv_with_file_uploader():
     uploaded_file = st.file_uploader("Upload your CSV file", type=['csv'])
     if uploaded_file is not None:
@@ -30,6 +31,7 @@ def read_csv_with_file_uploader():
         # To read file as string (assuming it's a CSV file):
         df = pd.read_csv(stringio)
         return df
+
 
 def input_file(data_file, n, radio_selection, df_cluster):
     global df
@@ -59,6 +61,7 @@ def input_file(data_file, n, radio_selection, df_cluster):
                 df_cluster = runDbScan(df_cluster)
     return df_cluster
 
+
 def export_clustered_data():
     if df is not None:
         data = df.sort_values('Cluster')
@@ -72,6 +75,7 @@ def export_clustered_data():
         else:
             st.write('No data to export.')
 
+
 def runKmean(df_cluster, n):
     st.title('Biểu đồ phân cụm')
     global selected_columns_list
@@ -83,7 +87,7 @@ def runKmean(df_cluster, n):
         df_cluster['Cluster'] = kmeans.labels_
         centroids = kmeans.cluster_centers_
         cluster_counts = df_cluster['Cluster'].value_counts()
-        if len(selected_columns_list) > 2 :
+        if len(selected_columns_list) > 2:
             # Create a 3D scatter plot of the clusters
             fig = go.Figure()
             # Define a color palette for the clusters
@@ -166,6 +170,7 @@ def runKmean(df_cluster, n):
             st.write('Số lượng điểm dữ liệu trong mỗi cụm:', cluster_counts)
     return df_cluster
 
+
 # Dựa theo dữ liệu đầu vào, phân tích và đưa ra giá trị eps và min_samples tối ưu
 def find_optimal_eps_min_samples(df_cluster):
     from sklearn.neighbors import NearestNeighbors
@@ -188,6 +193,7 @@ def find_optimal_eps_min_samples(df_cluster):
     st.write('Giá trị min_samples tối ưu:', min_samples)
     return eps, min_samples
 
+
 def runDbScan(df_cluster):
     global selected_columns_list
     radio_button = st.radio('Lựa chọn giá trị eps và min_samples', ['Tối ưu', 'Tự nhập'])
@@ -198,8 +204,8 @@ def runDbScan(df_cluster):
         min_samples = st.slider('Chọn giá trị min_samples', min_value=1, max_value=200, value=5, step=1)
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     clusters = dbscan.fit_predict(df_cluster)
-    df_cluster['Cluster'] = clusters 
-    st.set_option('deprecation.showPyplotGlobalUse', False) 
+    df_cluster['Cluster'] = clusters
+    st.set_option('deprecation.showPyplotGlobalUse', False)
     # Tạo biểu đồ phân tán với các điểm dữ liệu được tô màu theo cụm
     fig = plt.figure(figsize=(10, 6))
     plt.scatter(
@@ -215,10 +221,10 @@ def runDbScan(df_cluster):
             plt.annotate('', (df_cluster.iloc[i, 0], df_cluster.iloc[i, 1]))
         else:
             plt.annotate(f'{txt}', (df_cluster.iloc[i, 0], df_cluster.iloc[i, 1]))
-    
+
     plt.title('DBSCAN Clustering')
     plt.xlabel(df_cluster.columns[0])
-    plt.ylabel(df_cluster.columns[1]) 
+    plt.ylabel(df_cluster.columns[1])
     st.pyplot(fig)
     # Count the number of data points in each cluster, excluding noise points
     cluster_counts = df_cluster['Cluster'].value_counts()
@@ -231,6 +237,7 @@ def runDbScan(df_cluster):
     st.write('Số lượng điểm dữ liệu trong mỗi cụm:')
     st.dataframe(cluster_counts)
     return df_cluster
+
 
 def Elbow(df_cluster):
     st.title('Chọn số cụm tối ưu bằng phương pháp Elbow')
@@ -247,6 +254,8 @@ def Elbow(df_cluster):
     ax.set_xlabel('Number of clusters')
     ax.set_ylabel('WCSS')
     st.pyplot(fig)
+
+
 def run():
     global df_cluster
     st.set_page_config(
@@ -257,7 +266,7 @@ def run():
     with st.sidebar:
         st.title('Menu')
         radio_selection = st.radio('Lựa chọn thuật toán', ['K-MEANS', 'DBSCAN'])
-    st.title('Các thuật toán học máy trong khai thác dữ liệu lớn và ứng dụng phân đoạn khách hàng')
+    st.title('Nghiên cứu một số vấn đề về dữ liệu lớn và học máy, ứng dụng trong phân loại khách hàng')
     if radio_selection == 'K-MEANS':
         st.markdown("<h1 style='text-align: center;'>KMEAN CLUSTERING</h1>", unsafe_allow_html=True)
     else:
@@ -267,8 +276,8 @@ def run():
         df['Cluster'] = df_cluster['Cluster']
         export_clustered_data()
 
+
 print('Running main func...')
 # running main func
 if __name__ == '__main__':
     run()
-   
